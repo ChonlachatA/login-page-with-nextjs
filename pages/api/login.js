@@ -1,6 +1,6 @@
 import bcrypt from 'bcryptjs';
 
-import * as userService from '../services/user.service';
+import * as userService from '../../services/user.service';
 
 export default async function handler(req, res) {
     try {

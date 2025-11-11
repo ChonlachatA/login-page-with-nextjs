@@ -1,4 +1,4 @@
-import { getSupabase } from '../../db';
+import { getSupabase } from '../db';
 
 export const getUserByUsername = async () => {
     try {
