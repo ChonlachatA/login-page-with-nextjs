@@ -23,21 +23,20 @@ export default function LoginPage() {
   const onSubmit = async (e) => {
     e.preventDefault();
     setMsgWarning('')
-    setLoading(true)
     const dataInput = {
       username: data.username,
       password: data.password,
     };
 
     if (!dataInput.username || !dataInput.password) {
-      setLoading(false)
       setMsgWarning('Please fill out all field')
     } else {
+      setLoading(true)
       const res = await loginService(JSON.stringify(dataInput))
+      setLoading(false)
       if (res.resCode !== '200') {
         setMsgWarning(res.msg)
       } else {
-        setLoading(false)
         localStorage.setItem('web-idp-token', dataInput.username)
         navigate.push('/')
       }
@@ -59,7 +58,7 @@ export default function LoginPage() {
             className="bg-white rounded-md shadow-2xl p-5 w-full lg:max-w-md"
             onSubmit={onSubmit}
           >
-            <h1 className="text-red-700 font-bold text-2xl my-5 text-center"> Welcome Back !! </h1>
+            <h1 className="text-red-700 font-bold text-2xl my-5 text-center"> Welcome to webpage</h1>
             <div className="flex items-center bg-zinc-50 shadow-md mb-8 py-2 px-3 rounded-md">
               <input
                 id="username"

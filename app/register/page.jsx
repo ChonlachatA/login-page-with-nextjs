@@ -26,22 +26,27 @@ export default function RegisterPage() {
   const onSubmit = async (e) => {
     e.preventDefault();
     setMsgWarning('')
-    setLoading(true)
     const dataInput = {
       username: data.username,
       password: data.password,
     };
 
-    if (dataInput.password === data.confirmPassword) {
-      const res = await registerService(JSON.stringify(dataInput))
-      setLoading(false)
-      if (res.resCode === '201') {
-        navigate.push('/login')
-      } else {
-        setMsgWarning(res.msg)
-      }
+    if (!dataInput.username || !dataInput.password) {
+      setMsgWarning('Please fill out all field')
     } else {
-      setMsgWarning('Password does not match');
+      if (dataInput.password === data.confirmPassword) {
+        setLoading(true)
+        const res = await registerService(JSON.stringify(dataInput))
+        setLoading(false)
+        if (res.resCode === '201') {
+          navigate.push('/login')
+        } else {
+          setMsgWarning(res.msg)
+        }
+      } else {
+        setLoading(false)
+        setMsgWarning('Password does not match');
+      }
     }
   };
 
@@ -102,14 +107,14 @@ export default function RegisterPage() {
               <span className="flex justify-center block w-11/12 bg-red-400 mx-auto mt-5 py-2 rounded-2xl text-white font-semibold mb-2">
                 Loading ...
               </span>
-              ) : (
-                <button
-                  type="submit"
-                  className="block w-11/12 bg-red-500 mx-auto mt-5 py-2 rounded-2xl hover:bg-red-800 hover:-translate-y-1 transition-all duration-500 text-white font-semibold mb-2 cursor-pointer"
-                >
-                  Create
-                </button>
-              )
+            ) : (
+              <button
+                type="submit"
+                className="block w-11/12 bg-red-500 mx-auto mt-5 py-2 rounded-2xl hover:bg-red-800 hover:-translate-y-1 transition-all duration-500 text-white font-semibold mb-2 cursor-pointer"
+              >
+                Create
+              </button>
+            )
             }
             <div className="bg-red-600 w-full h-0.5 mt-9 shadow-md" />
             <div className="flex justify-center mt-6 mb-8">
