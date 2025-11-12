@@ -1,7 +1,21 @@
 'use client'
-import Link from "next/link";
+import { useEffect } from 'react';
 
-export default function HomePage() {
+import { useRouter } from 'next/navigation';
+
+export default  function HomePage() {
+  const navigate = useRouter();
+  useEffect(() => {
+    const token = localStorage.getItem('web-idp-token')
+    if (!token) {
+      navigate.push('/login');
+    };
+  }, [])
+
+  const clickLogout = () => {
+    localStorage.removeItem('web-idp-token');
+    navigate.push('/login');
+  };
 
   return (
     <>
@@ -12,7 +26,12 @@ export default function HomePage() {
             <img src="/awareLogo.png" alt="" className="h-10 w-auto" />
           </div>
           <div className="flex flex-1 justify-end">
-            <Link href="/login" className="text-sm/6 font-semibold text-gray-900 hover:text-red-800 hover:underline">Log Out <span aria-hidden="true">&rarr;</span></Link>
+            <span
+              className="text-sm/6 font-semibold text-gray-900 hover:text-red-800 hover:underline cursor-pointer"
+              onClick={clickLogout}
+            >
+              Log Out <span aria-hidden="true">&rarr;</span>
+            </span>
           </div>
         </nav>
       </header>

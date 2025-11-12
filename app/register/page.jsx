@@ -9,6 +9,8 @@ import { registerService } from '../service';
 // import { useNavigate } from 'react-router-dom';
 
 export default function RegisterPage() {
+  const [loading, setLoading] = useState(false)
+  const [msgWarning, setMsgWarning] = useState('')
   const [data, setData] = useState({
     username: '',
     password: '',
@@ -16,7 +18,6 @@ export default function RegisterPage() {
   });
   const navigate = useRouter();
 
-  const [msgWarning, setMsgWarning] = useState('')
 
   const handleOnChange = (e) => {
     setData({ ...data, [e.target.name]: e.target.value });
@@ -24,14 +25,16 @@ export default function RegisterPage() {
 
   const onSubmit = async (e) => {
     e.preventDefault();
+    setMsgWarning('')
+    setLoading(true)
     const dataInput = {
       username: data.username,
       password: data.password,
     };
 
     if (dataInput.password === data.confirmPassword) {
-      setMsgWarning('')
       const res = await registerService(JSON.stringify(dataInput))
+      setLoading(false)
       if (res.resCode === '201') {
         navigate.push('/login')
       } else {
@@ -95,12 +98,19 @@ export default function RegisterPage() {
                 </div>
               }
             </div>
-            <button
-              type="submit"
-              className="block w-11/12 bg-red-500 mx-auto mt-5 py-2 rounded-2xl hover:bg-red-800 hover:-translate-y-1 transition-all duration-500 text-white font-semibold mb-2 cursor-pointer"
-            >
-              Create
-            </button>
+            {loading ? (
+              <span className="flex justify-center block w-11/12 bg-red-400 mx-auto mt-5 py-2 rounded-2xl text-white font-semibold mb-2">
+                Loading ...
+              </span>
+              ) : (
+                <button
+                  type="submit"
+                  className="block w-11/12 bg-red-500 mx-auto mt-5 py-2 rounded-2xl hover:bg-red-800 hover:-translate-y-1 transition-all duration-500 text-white font-semibold mb-2 cursor-pointer"
+                >
+                  Create
+                </button>
+              )
+            }
             <div className="bg-red-600 w-full h-0.5 mt-9 shadow-md" />
             <div className="flex justify-center mt-6 mb-8">
               <span className="text-sm ml-2">

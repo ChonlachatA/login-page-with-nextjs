@@ -7,11 +7,12 @@ import { useRouter } from 'next/navigation';
 import { loginService } from '../service';
 
 export default function LoginPage() {
+  const [loading, setLoading] = useState(false)
+  const [msgWarning, setMsgWarning] = useState('')
   const [data, setData] = useState({
     username: '',
     password: '',
   });
-  const [msgWarning, setMsgWarning] = useState('')
 
   const navigate = useRouter();
 
@@ -22,18 +23,22 @@ export default function LoginPage() {
   const onSubmit = async (e) => {
     e.preventDefault();
     setMsgWarning('')
+    setLoading(true)
     const dataInput = {
       username: data.username,
       password: data.password,
     };
 
     if (!dataInput.username || !dataInput.password) {
+      setLoading(false)
       setMsgWarning('Please fill out all field')
     } else {
       const res = await loginService(JSON.stringify(dataInput))
       if (res.resCode !== '200') {
         setMsgWarning(res.msg)
       } else {
+        setLoading(false)
+        localStorage.setItem('web-idp-token', dataInput.username)
         navigate.push('/')
       }
     }
@@ -77,17 +82,24 @@ export default function LoginPage() {
             </div>
             <div>
               {msgWarning != '' &&
-                <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
-                  <span class="font-bold">{msgWarning}</span>
+                <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
+                  <span className="font-bold">{msgWarning}</span>
                 </div>
               }
             </div>
-            <button
-              type="submit"
-              className="block w-11/12 bg-red-500 mx-auto mt-5 py-2 rounded-2xl hover:bg-red-800 hover:-translate-y-1 transition-all duration-500 text-white font-semibold mb-2 cursor-pointer"
-            >
-              Login
-            </button>
+            {loading ? (
+              <span className="flex justify-center block w-11/12 bg-red-400 mx-auto mt-5 py-2 rounded-2xl text-white font-semibold mb-2">
+                Loading ...
+              </span>
+              ) : (
+                <button
+                  type="submit"
+                  className="block w-11/12 bg-red-500 mx-auto mt-5 py-2 rounded-2xl hover:bg-red-800 hover:-translate-y-1 transition-all duration-500 text-white font-semibold mb-2 cursor-pointer"
+                >
+                  Login
+                </button>
+              )
+            }
             <div className="bg-red-600 w-full h-0.5 mt-9 shadow-md" />
             <div className="flex justify-center mt-6 mb-8">
               <span className="text-sm ml-2">
@@ -111,4 +123,3 @@ export default function LoginPage() {
     </div>
   );
 }
-// idpAwareNextJS
