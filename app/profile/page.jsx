@@ -1,43 +1,70 @@
 'use client'
-import { useState } from 'react';
+import {
+  useEffect,
+  useState,
+} from 'react';
 
+import * as jwt from 'jsonwebtoken';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 
-import { registerService } from '../service';
+import {
+  changePasswordService,
+  deleteUserService,
+} from '../service';
 
-export default function RegisterPage() {
-  const [loading, setLoading] = useState(false)
-  const [msgWarning, setMsgWarning] = useState('')
+export default function ProfilePage() {
+  const [loading, setLoading] = useState(false);
+  const [msgWarning, setMsgWarning] = useState('');
+  const [user, setUser] = useState({});
   const [data, setData] = useState({
-    username: '',
-    password: '',
+    oldPassword: '',
+    newPassword: '',
     confirmPassword: '',
   });
   const navigate = useRouter();
 
+  useEffect(() => {
+    const token = localStorage.getItem('web-idp-token');
+    const payload = jwt.decode(token);
+    setUser(payload);
+  }, []);
 
   const handleOnChange = (e) => {
     setData({ ...data, [e.target.name]: e.target.value });
   };
 
+  const onClickDeleted = async (e) => {
+    e.preventDefault();
+    setLoading(true)
+    const res = await deleteUserService(user.id)
+    setLoading(false)
+    if (res.resCode === '200') {
+      localStorage.removeItem('web-idp-token');
+      navigate.push('/login')
+    } else {
+      setMsgWarning(res.data.msg)
+    }
+  };
+
   const onSubmit = async (e) => {
     e.preventDefault();
-    setMsgWarning('')
+    setMsgWarning('');
     const dataInput = {
-      username: data.username,
-      password: data.password,
+      username: user.username,
+      oldPassword: data.oldPassword,
+      password: data.newPassword,
     };
 
-    if (!dataInput.username || !dataInput.password) {
+    if (!dataInput.password || !data.newPassword || !data.oldPassword) {
       setMsgWarning('Please fill out all field')
     } else {
       if (dataInput.password === data.confirmPassword) {
         setLoading(true)
-        const res = await registerService(JSON.stringify(dataInput))
+        const res = await changePasswordService(user.id, JSON.stringify(dataInput))
         setLoading(false)
-        if (res.resCode === '201') {
-          navigate.push('/login')
+        if (res.resCode === '200') {
+          navigate.push('/')
         } else {
           setMsgWarning(res.data.msg)
         }
@@ -63,14 +90,24 @@ export default function RegisterPage() {
             className="bg-white rounded-md shadow-2xl p-5 w-full lg:max-w-md"
             onSubmit={onSubmit}
           >
-            <h1 className="text-red-700 font-bold text-2xl my-5 text-center"> Create your account </h1>
-            <div className="flex items-center bg-zinc-50 shadow-md mb-8 py-2 px-3 rounded-md">
+            <h1 className="text-red-700 font-bold text-2xl my-5 text-center"> Change Your Password </h1>
+            <div className="flex items-center bg-zinc-200 shadow-sm mb-8 py-2 px-3 rounded-md">
               <input
                 id="username"
-                className=" pl-2 w-full outline-none border-none bg-zinc-50"
+                className="pl-2 w-full outline-none border-none bg-zinc-200 font-bold"
                 type="text"
                 name="username"
-                placeholder="Username"
+                placeholder={user.username}
+                disabled
+              />
+            </div>
+            <div className="flex items-center bg-zinc-50 shadow-md mb-8 py-2 px-3 rounded-md ">
+              <input
+                className="pl-2 w-full outline-none border-none bg-zinc-50"
+                type="password"
+                name="oldPassword"
+                id="oldPassword"
+                placeholder="Old Password"
                 onChange={handleOnChange}
               />
             </div>
@@ -78,9 +115,9 @@ export default function RegisterPage() {
               <input
                 className="pl-2 w-full outline-none border-none bg-zinc-50"
                 type="password"
-                name="password"
-                id="password"
-                placeholder="Password"
+                name="newPassword"
+                id="newPassword"
+                placeholder="New Password"
                 onChange={handleOnChange}
               />
             </div>
@@ -110,21 +147,28 @@ export default function RegisterPage() {
                 type="submit"
                 className="block w-11/12 bg-red-500 mx-auto mt-5 py-2 rounded-2xl hover:bg-red-800 hover:-translate-y-1 transition-all duration-500 text-white font-semibold mb-2 cursor-pointer"
               >
-                Create
+                Confirm
               </button>
             )
             }
             <div className="bg-red-600 w-full h-0.5 mt-9 shadow-md" />
-            <div className="flex justify-center mt-6 mb-8">
-              <span className="text-sm ml-2">
-                Did you have account ?{' '}
+            <div className="flex justify-between items-center my-2 w-full">
+              <span className="text-sm py-2">
                 <Link
-                  href="login"
+                  href="/"
                   className="hover:text-red-600 underline underline-offset-4"
                 >
-                  Login
+                  back to homepage
                 </Link>
               </span>
+              {!loading &&
+                <button
+                  className="block text-sm w-30 bg-red-200 py-2 rounded-xl hover:bg-red-300 hover:text-white transition-all duration-500 text-red-400 font-semibold cursor-pointer"
+                  onClick={onClickDeleted}
+                >
+                  Delete User
+                </button>
+              }
             </div>
           </form>
         </div>

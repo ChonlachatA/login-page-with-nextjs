@@ -35,9 +35,9 @@ export default function LoginPage() {
       const res = await loginService(JSON.stringify(dataInput))
       setLoading(false)
       if (res.resCode !== '200') {
-        setMsgWarning(res.msg)
+        setMsgWarning(res.data.msg)
       } else {
-        localStorage.setItem('web-idp-token', dataInput.username)
+        localStorage.setItem('web-idp-token', res.data.token)
         navigate.push('/')
       }
     }

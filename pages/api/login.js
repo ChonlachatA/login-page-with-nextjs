@@ -1,6 +1,9 @@
 import bcrypt from 'bcryptjs';
+import * as jwt from 'jsonwebtoken';
 
 import * as userService from '../../services/user.service';
+
+const secret = process.env.SECRET;
 
 export default async function handler(req, res) {
     try {
@@ -8,24 +11,30 @@ export default async function handler(req, res) {
         const method = req.method;
 
         if (method !== 'POST') {
-            res.status(405).end(`Method ${req.method} ${req.url} Not Allowed`)
+            return res.status(405).json({resCode: '405',  data: {msg: `Method ${req.method} ${req.url} Not Allowed`}});
         }
 
         // check user
-        const getUser = await userService.getUserByUsername()
-        const user = getUser.find(d => d.username === body.username)
-        if (!user) {
-            return res.status(400).json({resCode: '400', msg: 'Username is not exists.'})
+        const getUser = await userService.findOneUser(body.username)
+        if (!getUser) {
+            return res.status(400).json({resCode: '400',  data: {msg: `User doesn't exists.`}});
         }
 
         // check Password
-        const checkPassword = await bcrypt.compare(body.password, user.password)
+        const checkPassword = await bcrypt.compare(body.password, getUser.password)
         if (!checkPassword) {
-            return res.status(400).json({resCode: '400', msg: 'Password is incorrect.'})
+            return res.status(400).json({resCode: '400',  data: {msg: `Password is incorrect.`}});
         }
 
-        return res.status(200).json({resCode: '200', msg: 'Login Success'})
+        const payload = {
+            id: getUser.id,
+            username: getUser.username
+        };
+
+        const token = jwt.sign(payload, secret);
+
+        return res.status(200).json({resCode: '200', data: {msg: 'Login Success', token}})
     } catch (error) {
-        return res.status(500).end(`Internal Server Error: ${error.message}`)
+        return res.status(500).json({resCode: '500',  data: {msg: `Internal Server Error: ${error.message}`}})
     }
 }

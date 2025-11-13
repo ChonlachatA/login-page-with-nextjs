@@ -1,9 +1,10 @@
 'use client'
 import { useEffect } from 'react';
 
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 
-export default  function HomePage() {
+export default function HomePage() {
   const navigate = useRouter();
   useEffect(() => {
     const token = localStorage.getItem('web-idp-token')
@@ -25,7 +26,15 @@ export default  function HomePage() {
           <div className="flex lg:flex-1">
             <img src="/awareLogo.png" alt="" className="h-10 w-auto" />
           </div>
-          <div className="flex flex-1 justify-end">
+          <div className="flex items-center justify-end">
+            <Link href="/profile">
+              <img
+                alt="User Profile"
+                src="https://cdn.pixabay.com/photo/2023/02/18/11/00/icon-7797704_640.png"
+                className="size-8 rounded-full bg-gray-100 outline -outline-offset-1 outline-white/10 mr-2 hover:shadow-xl cursor-pointer"
+              />
+            </Link>
+
             <span
               className="text-sm/6 font-semibold text-gray-900 hover:text-red-800 hover:underline cursor-pointer"
               onClick={clickLogout}
